@@ -3,76 +3,32 @@
 # $Id$
 # Copyright 2014 sampnt@ Alcatel-lucent
 # ---------------------------------------------------------------------------------
-
-#- name: Copy the EPEL repository definition
-#  copy: src=epel.repo dest=/etc/yum.repos.d/epel.repo
-
-#- name: Create the GPG key for EPEL
-#  copy: src=RPM-GPG-KEY-EPEL-6 dest=/etc/pki/rpm-gpg
-
-- name: Disable NIS in Name Service Switch config
+- name: config libvirt
   lineinfile: 
-    backup=yes state=present dest=/etc/nsswitch.conf backrefs=yes
+    backup=yes state=present dest=/etc/sysconfig/libvirtd backrefs=yes
     regexp="{{ item.regexp }}"
     line="{{ item.line }}"
   with_items:
-    - { regexp: '^passwd:', line: '#passwd:     files nis' }   
-    - { regexp: '^shadow:', line: '#shadow:     files nis' }
-    - { regexp: '^group:', line: '#group:     files nis' }
-    
-- name: Setup one group oneadmin
-  group: name="{{ one_group_name }}" gid="{{ one_group_id }}" state=present
-
-#vars_prompt:
-#  - name: "user_password"    
-#    prompt: "Enter a password for the {{ one_user_name }}"    
-#    private: yes    
-#    encrypt: "md5_crypt" #need to have python-passlib installed in local machine before we can use it    
-#    confirm: yes    
-#    salt_size: 7
-
-- name: Setup one user oneadmin
-  user: name="{{ one_user_name }}" group="{{ one_group_name }}" home="{{ one_user_home }}" 
-    uid="{{ one_user_id }}" password="{{ one_user_password }}"
-    
-- name: Change super user password 
-  user: name="root" password="{{ new_superuser_password }}"  
-
-# Umount fstab
-- name: Umount /etc/fstab
-  command: "{{item}}"
-  with_items:
-    - mount -a
-    - umount /var/lib/one/tools
-    - umount /var/lib/one/datastores/100
-    - umount /vm/cache_on_server
-     
-# Change one_user_home ownership
-- name: Setup oneadmin home ownership
-  file: path="{{ one_user_home }}" state=directory owner="{{ one_user_name }}" group="{{ one_group_name }}" recurse=true
-
-# Remount fstab
-- name: Remount /etc/fstab
-  command: mount -a
-  
-# Setup ntp cliente
-- name: Install ntp
-  yum: name=ntp state=present
-
-- name: Create ntp configuration file
-  template: src=ntp.conf.j2 dest=/etc/ntp.conf
-  notify: restart ntpd
+    - { regexp: '^#LIBVIRTD_ARGS', line: 'LIBVIRTD_ARGS="--listen"' }
+    - { regexp: '^#LIBVIRTD_CONFIG', line: 'LIBVIRTD_CONFIG=/etc/libvirt/libvirtd.conf' }
+  notify: restart libvirtd   
  
-# Config sshd
-- name: Config sshd
+- name: Config libvirtd
   lineinfile: 
-    backup=yes state=present dest=/etc/ssh/sshd_config backrefs=yes
+    backup=yes state=present dest=/etc/libvirt/libvirtd.conf backrefs=yes
     regexp="{{ item.regexp }}"
     line="{{ item.line }}"
   with_items:
-    - { regexp: '^#MaxSessions', line: 'MaxSessions 100' }   
-    - { regexp: '^#MaxStartups', line: 'MaxStartups 100' }
-  notify: restart sshd
-  
-# Its nice to turn on again. We dont because we have zabbix installation later 
-#- name: Enable NIS in Name Service Switch config
+    - { regexp: '^#listen_tls', line: 'listen_tls = 0' }   
+    - { regexp: '^#listen_tcp', line: 'listen_tcp = 1' }
+    - { regexp: '^#tcp_port', line: 'tcp_port = "16509"' }
+    - { regexp: '^#unix_sock_group', line: 'unix_sock_group = "{{one_user_name}}"' }
+    - { regexp: '^#auth_unix_ro', line: 'auth_unix_ro = "none"' }
+    - { regexp: '^#auth_unix_rw', line: 'auth_unix_rw = "none"' }
+    - { regexp: '^#auth_tcp', line: 'auth_tcp = "none"' }
+    - { regexp: '^#max_clients', line: 'max_clients = 2048' }
+    - { regexp: '^#min_workers', line: 'min_workers = 10' }
+    - { regexp: '^#max_workers', line: 'max_workers = 400"' }
+    - { regexp: '^#max_requests', line: 'max_requests = 2000' }
+    - { regexp: '^#max_client_requests', line: 'max_client_requests = 400' }
+  notify: restart libvirtd
