@@ -3,76 +3,30 @@
 # $Id$
 # Copyright 2014 sampnt@ Alcatel-lucent
 # ---------------------------------------------------------------------------------
-
-#- name: Copy the EPEL repository definition
-#  copy: src=epel.repo dest=/etc/yum.repos.d/epel.repo
-
-#- name: Create the GPG key for EPEL
-#  copy: src=RPM-GPG-KEY-EPEL-6 dest=/etc/pki/rpm-gpg
-
-- name: Disable NIS in Name Service Switch config
-  lineinfile: 
-    backup=yes state=present dest=/etc/nsswitch.conf backrefs=yes
-    regexp="{{ item.regexp }}"
-    line="{{ item.line }}"
-  with_items:
-    - { regexp: '^passwd:', line: '#passwd:     files nis' }   
-    - { regexp: '^shadow:', line: '#shadow:     files nis' }
-    - { regexp: '^group:', line: '#group:     files nis' }
-    
-- name: Setup one group oneadmin
-  group: name="{{ one_group_name }}" gid="{{ one_group_id }}" state=present
-
-#vars_prompt:
-#  - name: "user_password"    
-#    prompt: "Enter a password for the {{ one_user_name }}"    
-#    private: yes    
-#    encrypt: "md5_crypt" #need to have python-passlib installed in local machine before we can use it    
-#    confirm: yes    
-#    salt_size: 7
-
-- name: Setup one user oneadmin
-  user: name="{{ one_user_name }}" group="{{ one_group_name }}" home="{{ one_user_home }}" 
-    uid="{{ one_user_id }}" password="{{ one_user_password }}"
-    
-- name: Change super user password 
-  user: name="root" password="{{ new_superuser_password }}"  
-
-# Umount fstab
-- name: Umount /etc/fstab
-  command: "{{item}}"
-  with_items:
-    - mount -a
-    - umount /var/lib/one/tools
-    - umount /var/lib/one/datastores/100
-    - umount /vm/cache_on_server
-     
-# Change one_user_home ownership
-- name: Setup oneadmin home ownership
-  file: path="{{ one_user_home }}" state=directory owner="{{ one_user_name }}" group="{{ one_group_name }}" recurse=true
-
-# Remount fstab
-- name: Remount /etc/fstab
-  command: mount -a
+- name: install the zabbix repo
+  yum: name=http://repo.zabbix.com/zabbix/2.4/rhel/6/x86_64/zabbix-release-2.4-1.el6.noarch.rpm state=present
   
-# Setup ntp cliente
-- name: Install ntp
-  yum: name=ntp state=present
+- name: install zabbix agent
+  yum: name=zabbix-agent state=present  
+  
+- name: Start/enable zabbix_agent
+  service: name=zabbix_agent state=started enabled=true  
 
-- name: Create ntp configuration file
-  template: src=ntp.conf.j2 dest=/etc/ntp.conf
-  notify: restart ntpd
+- name: Create zabbix agent configuration file from template
+  template: src=zabbix_agentd.conf.j2 dest=/etc/zabbix/zabbix_agentd.conf
+  notify: restart zabbix_agent
  
-# Config sshd
-- name: Config sshd
-  lineinfile: 
-    backup=yes state=present dest=/etc/ssh/sshd_config backrefs=yes
-    regexp="{{ item.regexp }}"
-    line="{{ item.line }}"
-  with_items:
-    - { regexp: '^#MaxSessions', line: 'MaxSessions 100' }   
-    - { regexp: '^#MaxStartups', line: 'MaxStartups 100' }
-  notify: restart sshd
-  
-# Its nice to turn on again. We dont because we have zabbix installation later 
-#- name: Enable NIS in Name Service Switch config
+- name: Copy sudoers file for safety
+  command: cp -f /etc/sudoers /etc/sudoers.tmp
+
+- name: Create sudoers file backup
+  command: cp -f /etc/sudoers /etc/sudoers.bak
+
+- name: make sure not require tty
+  lineinfile: dest=/etc/sudoers.tmp state=present regexp='^Defaults    requiretty' line='Defaults    \!requiretty'
+
+- name: also make sure zabbix-agent works via sudo
+  lineinfile: dest=/etc/sudoers.tmp state=present regexp='^zabbix ALL\=NOPASSWD' line='zabbix ALL=NOPASSWD: /sbin/service libvirtd restart'
+
+- name: Final sudoers file check
+  shell: visudo -q -c -f /etc/sudoers.tmp && cp -f /etc/sudoers.tmp /etc/sudoers && rm -f /etc/sudoers.tmp

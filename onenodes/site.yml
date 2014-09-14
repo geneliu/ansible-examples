@@ -1,9 +1,17 @@
 ---
 - name: Install OpenNebula, setup bridge and tunning
   hosts: samvmsrv13
+  accelerate: true
   user: root
   # remote_user: user
   # sudo: yes
 
   roles:
     - common
+    - one
+    - libvirt
+    - ssh-keys
+    - network
+    - tuned
+    - zabbix
+    - cleanup

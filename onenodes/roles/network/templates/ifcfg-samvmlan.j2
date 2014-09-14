@@ -1,0 +1,12 @@
+DEVICE=samvmlan
+NM_CONTROLLED="no"
+ONBOOT="yes"
+TYPE=Bridge
+IPADDR={{ansible_eth0.ipv4.address}}
+PREFIX=23
+GATEWAY=135.121.90.1
+DNS1=138.120.252.56
+DOMAIN="ca.alcatel-lucent.com labs.ca.alcatel-lucent.com"
+IPV6INIT=no
+DELAY=0
+NAME="Bridge to eth0"

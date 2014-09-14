@@ -3,15 +3,11 @@
 # $Id$
 # Copyright 2014 sampnt@ Alcatel-lucent
 # ---------------------------------------------------------------------------------
-- name: config libvirt
-  lineinfile: 
-    backup=yes state=present dest=/etc/sysconfig/libvirtd backrefs=yes
-    regexp="{{ item.regexp }}"
-    line="{{ item.line }}"
+- name: Install libvirt and kvm
+  yum: name={{item}} state=present
   with_items:
-    - { regexp: '^#LIBVIRTD_ARGS', line: 'LIBVIRTD_ARGS="--listen"' }
-    - { regexp: '^#LIBVIRTD_CONFIG', line: 'LIBVIRTD_CONFIG=/etc/libvirt/libvirtd.conf' }
-  notify: restart libvirtd   
+    - libvirt
+    - kvm   
  
 - name: Config libvirtd
   lineinfile: 
@@ -21,14 +17,48 @@
   with_items:
     - { regexp: '^#listen_tls', line: 'listen_tls = 0' }   
     - { regexp: '^#listen_tcp', line: 'listen_tcp = 1' }
-    - { regexp: '^#tcp_port', line: 'tcp_port = "16509"' }
-    - { regexp: '^#unix_sock_group', line: 'unix_sock_group = "{{one_user_name}}"' }
-    - { regexp: '^#auth_unix_ro', line: 'auth_unix_ro = "none"' }
-    - { regexp: '^#auth_unix_rw', line: 'auth_unix_rw = "none"' }
-    - { regexp: '^#auth_tcp', line: 'auth_tcp = "none"' }
+    - { regexp: '^#tcp_port', line: 'tcp_port = \"16509\"' }
+    - { regexp: '^#unix_sock_group', line: 'unix_sock_group = \""{{one_user_name}}"\"' }
+    - { regexp: '^#auth_unix_ro', line: 'auth_unix_ro = \"none\"' }
+    - { regexp: '^#auth_unix_rw', line: 'auth_unix_rw = \"none\"' }
+    - { regexp: '^#auth_tcp', line: 'auth_tcp = \"none\"' }
     - { regexp: '^#max_clients', line: 'max_clients = 2048' }
     - { regexp: '^#min_workers', line: 'min_workers = 10' }
-    - { regexp: '^#max_workers', line: 'max_workers = 400"' }
+    - { regexp: '^#max_workers', line: 'max_workers = 400' }
     - { regexp: '^#max_requests', line: 'max_requests = 2000' }
     - { regexp: '^#max_client_requests', line: 'max_client_requests = 400' }
   notify: restart libvirtd
+  
+- name: config libvirt
+  lineinfile: 
+    backup=yes state=present dest=/etc/sysconfig/libvirtd backrefs=yes
+    regexp="{{ item.regexp }}"
+    line="{{ item.line }}"
+  with_items:
+    - { regexp: '^#LIBVIRTD_ARGS', line: 'LIBVIRTD_ARGS="--listen"' }
+    - { regexp: '^#LIBVIRTD_CONFIG', line: 'LIBVIRTD_CONFIG=/etc/libvirt/libvirtd.conf' }
+  notify: restart libvirtd
+    
+- name: Change listen_addr in libvirtd
+  lineinfile: 
+    backup=yes state=present dest=/etc/libvirt/libvirtd.conf backrefs=yes
+    regexp="{{ item.regexp }}"
+    line="{{ item.line }}"
+  with_items:
+    - { regexp: '^#listen_addr', line: 'listen_addr = \""{{ansible_eth1.ipv4.address}}"\"' }
+  when: ansible_eth1.ipv4.address is defined
+  notify: restart libvirtd
+
+- name: Start/enable libvirtd
+  service: name=libvirtd state=started enabled=true
+    
+- name: List virt network
+  shell: virsh net-list
+  register: virt_net
+
+- name: Delete the default virt-net
+  command: "{{item}}"
+  with_items:
+    - virsh net-destroy default
+    - virsh net-undefine default
+  when: virt_net.stdout.find('default') != -1

@@ -3,76 +3,45 @@
 # $Id$
 # Copyright 2014 sampnt@ Alcatel-lucent
 # ---------------------------------------------------------------------------------
+- name: Stop/Disable unused services 
+  service: name={{item}} state=stopped enabled=false
+  with_items:
+    - NetworkManager
+    - bluetooth
+    - httpd
+    - ipsec
+    - jexec
+    - ksmtuned
+    - libvirt-guests
+    - named
+    - openct
+    - pcscd
+    - postfix
+    - rhnsd
+    - rhsmcertd
+    - spice-vdagentd
+    - svnserve
+    - sysstat
+    - virt-who
+    - vncserver
+    - vsftpd
+    - wine
+    - wpa_supplicant   
 
-#- name: Copy the EPEL repository definition
-#  copy: src=epel.repo dest=/etc/yum.repos.d/epel.repo
-
-#- name: Create the GPG key for EPEL
-#  copy: src=RPM-GPG-KEY-EPEL-6 dest=/etc/pki/rpm-gpg
-
-- name: Disable NIS in Name Service Switch config
+- name: Enable NIS in Name Service Switch config
   lineinfile: 
-    backup=yes state=present dest=/etc/nsswitch.conf backrefs=yes
+    state=present dest=/etc/nsswitch.conf backrefs=yes
     regexp="{{ item.regexp }}"
     line="{{ item.line }}"
   with_items:
-    - { regexp: '^passwd:', line: '#passwd:     files nis' }   
-    - { regexp: '^shadow:', line: '#shadow:     files nis' }
-    - { regexp: '^group:', line: '#group:     files nis' }
-    
-- name: Setup one group oneadmin
-  group: name="{{ one_group_name }}" gid="{{ one_group_id }}" state=present
+    - { regexp: '^#passwd:', line: 'passwd:     files nis' }   
+    - { regexp: '^#shadow:', line: 'shadow:     files nis' }
+    - { regexp: '^#group:', line: 'group:     files nis' }
 
-#vars_prompt:
-#  - name: "user_password"    
-#    prompt: "Enter a password for the {{ one_user_name }}"    
-#    private: yes    
-#    encrypt: "md5_crypt" #need to have python-passlib installed in local machine before we can use it    
-#    confirm: yes    
-#    salt_size: 7
-
-- name: Setup one user oneadmin
-  user: name="{{ one_user_name }}" group="{{ one_group_name }}" home="{{ one_user_home }}" 
-    uid="{{ one_user_id }}" password="{{ one_user_password }}"
-    
-- name: Change super user password 
-  user: name="root" password="{{ new_superuser_password }}"  
-
-# Umount fstab
-- name: Umount /etc/fstab
-  command: "{{item}}"
-  with_items:
-    - mount -a
-    - umount /var/lib/one/tools
-    - umount /var/lib/one/datastores/100
-    - umount /vm/cache_on_server
-     
-# Change one_user_home ownership
-- name: Setup oneadmin home ownership
-  file: path="{{ one_user_home }}" state=directory owner="{{ one_user_name }}" group="{{ one_group_name }}" recurse=true
-
-# Remount fstab
-- name: Remount /etc/fstab
-  command: mount -a
-  
-# Setup ntp cliente
-- name: Install ntp
-  yum: name=ntp state=present
-
-- name: Create ntp configuration file
-  template: src=ntp.conf.j2 dest=/etc/ntp.conf
-  notify: restart ntpd
- 
-# Config sshd
-- name: Config sshd
+- name: Change default runlevel
   lineinfile: 
-    backup=yes state=present dest=/etc/ssh/sshd_config backrefs=yes
+    state=present dest=/etc/inittab backrefs=yes
     regexp="{{ item.regexp }}"
     line="{{ item.line }}"
   with_items:
-    - { regexp: '^#MaxSessions', line: 'MaxSessions 100' }   
-    - { regexp: '^#MaxStartups', line: 'MaxStartups 100' }
-  notify: restart sshd
-  
-# Its nice to turn on again. We dont because we have zabbix installation later 
-#- name: Enable NIS in Name Service Switch config
+    - { regexp: '^id:5:initdefault:', line: 'id:3:initdefault:' }

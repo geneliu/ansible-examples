@@ -16,7 +16,7 @@
     - ksm
 
 - name: Setup tuned profile to virtual-host
-  command: tuned-admin profile virtual-host 
+  command: tuned-adm profile virtual-host 
       
 - name: Config tuned.conf
   copy: src=tuned.conf dest=/etc/tune-profiles/virtual-host/tuned.conf
@@ -25,3 +25,13 @@
 - name: Config sysctl.ktune
   copy: src=sysctl.ktune dest=/etc/tune-profiles/virtual-host/sysctl.ktune
   notify: restart tuned
+  
+- name: Config sshd
+  lineinfile: 
+    backup=yes state=present dest=/etc/ssh/sshd_config backrefs=yes
+    regexp="{{ item.regexp }}"
+    line="{{ item.line }}"
+  with_items:
+    - { regexp: '^#MaxSessions', line: 'MaxSessions 100' }   
+    - { regexp: '^#MaxStartups', line: 'MaxStartups 100' }
+  notify: restart sshd

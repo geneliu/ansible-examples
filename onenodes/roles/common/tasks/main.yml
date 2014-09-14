@@ -46,27 +46,23 @@
   
 - name: Install ntp
   yum: name=ntp state=present
+  
+- name: Install htop
+  yum: name=htop state=present  
+  
+- name: Start/enable ntp
+  service: name=ntpd state=started enabled=true  
 
 # Consider to setup the server directly instead of a template
 - name: Create ntp configuration file
   template: src=ntp.conf.j2 dest=/etc/ntp.conf
   notify: restart ntpd
- 
-- name: Config sshd
-  lineinfile: 
-    backup=yes state=present dest=/etc/ssh/sshd_config backrefs=yes
-    regexp="{{ item.regexp }}"
-    line="{{ item.line }}"
-  with_items:
-    - { regexp: '^#MaxSessions', line: 'MaxSessions 100' }   
-    - { regexp: '^#MaxStartups', line: 'MaxStartups 100' }
-  notify: restart sshd
 
-- name: Config/disable iptables
-  service name={{item}} state=stopped enabled=false
-    with_items:
-      - iptables
-      - ip6tables
+- name: Stop/disable iptables
+  service: name={{ item }} state=stopped enabled=false
+  with_items:
+    - iptables
+    - ip6tables
   
 - name: Config/disable Selinux
   selinux: policy=targeted state=disabled
