@@ -37,6 +37,7 @@
     - umount /var/lib/one/tools
     - umount /var/lib/one/datastores/100
     - umount /vm/cache_on_server
+  ignore_errors: yes
      
 - name: Setup oneadmin home ownership
   file: path="{{ one_user_home }}" state=directory owner="{{ one_user_name }}" group="{{ one_group_name }}" recurse=true

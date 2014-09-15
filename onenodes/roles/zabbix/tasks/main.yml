@@ -10,11 +10,11 @@
   yum: name=zabbix-agent state=present  
   
 - name: Start/enable zabbix_agent
-  service: name=zabbix_agent state=started enabled=true  
+  service: name=zabbix-agent state=started enabled=true  
 
 - name: Create zabbix agent configuration file from template
   template: src=zabbix_agentd.conf.j2 dest=/etc/zabbix/zabbix_agentd.conf
-  notify: restart zabbix_agent
+  notify: restart zabbix-agent
  
 - name: Copy sudoers file for safety
   command: cp -f /etc/sudoers /etc/sudoers.tmp
@@ -22,11 +22,11 @@
 - name: Create sudoers file backup
   command: cp -f /etc/sudoers /etc/sudoers.bak
 
-- name: make sure not require tty
-  lineinfile: dest=/etc/sudoers.tmp state=present regexp='^Defaults    requiretty' line='Defaults    \!requiretty'
+- name: Make sure sudo does not require tty
+  lineinfile: dest=/etc/sudoers.tmp state=present regexp='^Defaults    requiretty' line='Defaults    !requiretty'
 
-- name: also make sure zabbix-agent works via sudo
-  lineinfile: dest=/etc/sudoers.tmp state=present regexp='^zabbix ALL\=NOPASSWD' line='zabbix ALL=NOPASSWD: /sbin/service libvirtd restart'
+- name: Make sure zabbix-agent works via sudo
+  lineinfile: "dest=/etc/sudoers.tmp state=present regexp='^zabbix ALL=NOPASSWD' line='zabbix ALL=NOPASSWD: /sbin/service libvirtd restart'"
 
 - name: Final sudoers file check
   shell: visudo -q -c -f /etc/sudoers.tmp && cp -f /etc/sudoers.tmp /etc/sudoers && rm -f /etc/sudoers.tmp

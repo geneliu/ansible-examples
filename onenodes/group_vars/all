@@ -18,9 +18,3 @@ ntp_server2: 139.188.72.222
 proxy_env:
   http_proxy: http://proxy.ca.alcatel-lucent.com:8080
   https_proxy: http://proxy.ca.alcatel-lucent.com:8080
-
-# Disable All Updates
-# By default automatic updates are enabled, set this value to true to disable all automatic updates
-# auto_up_disable: false
-
-# core_update_level: true

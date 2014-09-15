@@ -11,13 +11,13 @@
     
 - name: Change eth0 to bridge
   copy: src=ifcfg-eth0 dest=/etc/sysconfig/network-scripts/ifcfg-eth0
-  
-- name: Start/enable network services 
-  service: name={{item}} state=started enabled=true
-  with_items:
-    - network
       
 - name: Setup bridge
   template: src=ifcfg-samvmlan.j2 dest=/etc/sysconfig/network-scripts/ifcfg-samvmlan
-  when: ansible_eth0.ipv4.address is defined
+  when: ansible_samvmlan is not defined
   notify: restart network
+
+- name: Start/enable network services 
+  service: name={{item}} state=started enabled=true
+  with_items:
+    - network  

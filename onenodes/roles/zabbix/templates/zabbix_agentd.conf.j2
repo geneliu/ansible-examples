@@ -97,7 +97,7 @@ Server=sampntmoni
 #
 # Mandatory: no
 # Default:
-ListenIP={{ansible_eth0.ipv4.address}}
+ListenIP={{ansible_default_ipv4.address}}
 
 ### Option: StartAgents
 #	Number of pre-forked instances of zabbix_agentd that process passive checks.

@@ -35,7 +35,7 @@
     regexp="{{ item.regexp }}"
     line="{{ item.line }}"
   with_items:
-    - { regexp: '^#LIBVIRTD_ARGS', line: 'LIBVIRTD_ARGS="--listen"' }
+    - { regexp: '^#LIBVIRTD_ARGS', line: 'LIBVIRTD_ARGS=\"--listen\"' }
     - { regexp: '^#LIBVIRTD_CONFIG', line: 'LIBVIRTD_CONFIG=/etc/libvirt/libvirtd.conf' }
   notify: restart libvirtd
     
