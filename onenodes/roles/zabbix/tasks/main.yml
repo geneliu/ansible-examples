@@ -23,7 +23,7 @@
   command: cp -f /etc/sudoers /etc/sudoers.bak
 
 - name: Make sure sudo does not require tty
-  lineinfile: dest=/etc/sudoers.tmp state=present regexp='^Defaults    requiretty' line='Defaults    !requiretty'
+  lineinfile: dest=/etc/sudoers.tmp state=present regexp='^Defaults    requiretty' line='Defaults    !requiretty' backrefs=yes
 
 - name: Make sure zabbix-agent works via sudo
   lineinfile: "dest=/etc/sudoers.tmp state=present regexp='^zabbix ALL=NOPASSWD' line='zabbix ALL=NOPASSWD: /sbin/service libvirtd restart'"

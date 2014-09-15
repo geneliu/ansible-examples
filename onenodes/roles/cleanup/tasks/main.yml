@@ -44,7 +44,4 @@
     regexp="{{ item.regexp }}"
     line="{{ item.line }}"
   with_items:
-    - { regexp: '^id:5:initdefault:', line: 'id:3:initdefault:' }
-
-- name: Reove local user authentication key
-  authorized_key: user=root key="{{ lookup('file', '/home/genel/.ssh/id_rsa.pub') }}" state=absent   
+    - { regexp: '^id:5:initdefault:', line: 'id:3:initdefault:' }   
