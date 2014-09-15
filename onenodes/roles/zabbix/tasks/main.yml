@@ -18,15 +18,18 @@
  
 - name: Copy sudoers file for safety
   command: cp -f /etc/sudoers /etc/sudoers.tmp
+  register: sudoers_tmp
 
 - name: Create sudoers file backup
   command: cp -f /etc/sudoers /etc/sudoers.bak
 
 - name: Make sure sudo does not require tty
   lineinfile: dest=/etc/sudoers.tmp state=present regexp='^Defaults    requiretty' line='Defaults    !requiretty' backrefs=yes
+  when: sudoers_tmp|changed
 
 - name: Make sure zabbix-agent works via sudo
   lineinfile: "dest=/etc/sudoers.tmp state=present regexp='^zabbix ALL=NOPASSWD' line='zabbix ALL=NOPASSWD: /sbin/service libvirtd restart'"
+  when: sudoers_tmp|changed
 
 - name: Final sudoers file check
   shell: visudo -q -c -f /etc/sudoers.tmp && cp -f /etc/sudoers.tmp /etc/sudoers && rm -f /etc/sudoers.tmp
