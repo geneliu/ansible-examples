@@ -8,6 +8,7 @@
   with_items:
     - tuned
 #    - tuned-utils
+  environment: proxy_env
 
 - name: Enable and start tuned/ksm 
   service: name={{item}} state=started enabled=true

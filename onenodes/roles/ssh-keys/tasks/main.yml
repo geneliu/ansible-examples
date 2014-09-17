@@ -8,11 +8,11 @@
   authorized_key: user=oneadmin
                   key="{{ item }}"
   with_file:
-    - one_samcloud_id_rsa.pub
-    - one_vmpnttools_id_rsa.pub
+    - "{{ samcloud_oneadmin_pub_key }}"
+    - "{{ samvmmgr_oneadmin_pub_key }}"
     
 - name: Set up authorized_keys for the super user
   authorized_key: user=root
                   key="{{ item }}"
   with_file:
-    - one_samcloud_id_rsa.pub
+    - "{{ samcloud_oneadmin_pub_key }}"

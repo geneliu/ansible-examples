@@ -8,6 +8,7 @@
   with_items:
     - libvirt
     - kvm   
+  environment: proxy_env
  
 - name: Config libvirtd
   lineinfile: 

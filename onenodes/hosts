@@ -1,8 +1,14 @@
 [defaults]
 host_key_checking=False
 
-[one-node]
-samvmsrv13
-samvmsrv15
-samvmsrv16
+[kanata]
+#samvmsrv13
+#samvmsrv15
+#samvmsrv16
 samvmsrv17
+
+[bangalore]
+samvmisrv1
+samvmisrv2
+samvmisrv3
+samvmisrv4

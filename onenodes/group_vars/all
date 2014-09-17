@@ -12,9 +12,3 @@ one_user_home: /var/lib/one
 # Prompt to user or generate by openssl passwd <plaintext>
 one_user_password: t23p2lnZK/Y66
 new_superuser_password: 38Gkf37QqNqf2
-# Environment
-ntp_server1: 135.1.1.111
-ntp_server2: 139.188.72.222
-proxy_env:
-  http_proxy: http://proxy.ca.alcatel-lucent.com:8080
-  https_proxy: http://proxy.ca.alcatel-lucent.com:8080

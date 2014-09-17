@@ -5,10 +5,9 @@
 # ---------------------------------------------------------------------------------
 
 #- name: Copy the EPEL repository definition
-#  copy: src=epel.repo dest=/etc/yum.repos.d/epel.repo
-
-#- name: Create the GPG key for EPEL
-#  copy: src=RPM-GPG-KEY-EPEL-6 dest=/etc/pki/rpm-gpg
+- name: install the EPEL repo
+  yum: name=http://mirror.sfo12.us.leaseweb.net/epel/6/i386/epel-release-6-8.noarch.rpm state=present
+  environment: proxy_env
 
 - name: Disable NIS in Name Service Switch config
   lineinfile: 
@@ -47,16 +46,18 @@
   
 - name: Install ntp
   yum: name=ntp state=present
+  environment: proxy_env
   
 - name: Install htop
   yum: name=htop state=present  
+  environment: proxy_env
   
 - name: Start/enable ntp
   service: name=ntpd state=started enabled=true  
 
 # Consider to setup the server directly instead of a template
 - name: Create ntp configuration file
-  template: src=ntp.conf.j2 dest=/etc/ntp.conf
+  template: src={{ ntp_conf_tpl }} dest=/etc/ntp.conf
   notify: restart ntpd
 
 - name: Stop/disable iptables

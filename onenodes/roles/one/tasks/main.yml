@@ -10,6 +10,7 @@
   yum: name={{item}} state=present
   with_items:
     - opennebula-node-kvm-{{ one_version }}
+  environment: proxy_env
    
 - name: Create one-kvm-rules
   copy: src=60-qemu-kvm.rules dest=/etc/udev/rules.d/60-qemu-kvm.rules

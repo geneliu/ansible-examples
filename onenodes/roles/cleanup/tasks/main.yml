@@ -26,7 +26,8 @@
     - vncserver
     - vsftpd
     - wine
-    - wpa_supplicant 
+    - wpa_supplicant
+  ignore_errors: yes
 
 - name: Enable NIS in Name Service Switch config
   lineinfile: 

@@ -8,12 +8,13 @@
   yum: name={{item}} state=present
   with_items:
     - bridge-utils
+  environment: proxy_env
     
 - name: Change eth0 to bridge
   copy: src=ifcfg-eth0 dest=/etc/sysconfig/network-scripts/ifcfg-eth0
       
 - name: Setup bridge
-  template: src=ifcfg-samvmlan.j2 dest=/etc/sysconfig/network-scripts/ifcfg-samvmlan
+  template: src={{ bridge_cfg_tpl }} dest=/etc/sysconfig/network-scripts/ifcfg-samvmlan
   when: ansible_samvmlan is not defined
   notify: restart network
 
