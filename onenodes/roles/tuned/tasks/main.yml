@@ -35,4 +35,6 @@
   with_items:
     - { regexp: '^#MaxSessions', line: 'MaxSessions 100' }   
     - { regexp: '^#MaxStartups', line: 'MaxStartups 100' }
+    - { regexp: '^#UseDNS yes', line: 'UseDNS no'}
+    - { regexp: '^GSSAPIAuthentication yes', line: 'GSSAPIAuthentication no'}
   notify: restart sshd

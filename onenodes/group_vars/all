@@ -1,7 +1,7 @@
 ---
 # Which version of OpenNebula to deploy
-one_version: 4.4.1
-one_repo_base_url: http://downloads.opennebula.org/repo/CentOS/6/stable/x86_64/
+one_version: 4.8.0
+one_repo_base_url: http://downloads.opennebula.org/repo/4.8/CentOS/6/x86_64
 
 # These are the OpenNebula user settings
 one_user_name: oneadmin

@@ -1,6 +1,7 @@
 ---
 - name: Install OpenNebula, setup bridge and tunning
-  hosts: bangalore
+  hosts: kanata
+#  hosts: bangalore
 #  accelerate: true
   user: root
   # remote_user: user

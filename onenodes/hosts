@@ -6,6 +6,7 @@ host_key_checking=False
 #samvmsrv15
 #samvmsrv16
 samvmsrv17
+samvmsrv18
 
 [bangalore]
 samvmisrv1

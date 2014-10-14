@@ -35,9 +35,22 @@
     - mount -a
     - umount /var/lib/one/tools
     - umount /var/lib/one/datastores/100
+    - umount /var/lib/one/datastores/101
+    - umount /var/lib/one/datastores/102
     - umount /vm/cache_on_server
   ignore_errors: yes
-     
+
+- name: Setup vm local directories
+  file: path="{{item}}" state=directory owner="{{ one_user_name }}" group="{{ one_group_name }}" recurse=true
+  with_items:
+    - /vm/vmsystem
+    - /vm/vmcache/102
+    - /vm/cache_on_server
+    - /var/lib/one/tools
+    - /var/lib/one/datastores/100
+    - /var/lib/one/datastores/101
+    - /var/lib/one/datastores/102
+
 - name: Setup oneadmin home ownership
   file: path="{{ one_user_home }}" state=directory owner="{{ one_user_name }}" group="{{ one_group_name }}" recurse=true
 

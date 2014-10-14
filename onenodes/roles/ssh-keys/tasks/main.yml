@@ -16,3 +16,4 @@
                   key="{{ item }}"
   with_file:
     - "{{ samcloud_oneadmin_pub_key }}"
+    - "{{ samvmmgr_oneadmin_pub_key }}"
